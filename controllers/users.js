@@ -29,14 +29,27 @@ module.exports.getUserById = (req, res) => {
 // создание пользователя
 // eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  if (!name || !about || !avatar) {
+  const { name, about } = req.body;
+  const userId = req.user._id;
+
+  if (!name || !about) {
     return res.status(400).send({ message: 'Не заполнены обязательные поля' });
   }
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
-    .catch((err) => res.status(400).send({ message: err.message }));
+  User.findByIdAndUpdate(
+    userId,
+    { name, about },
+    // eslint-disable-next-line comma-dangle
+    { new: true, runValidators: true }
+  )
+    // eslint-disable-next-line consistent-return
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Пользователь не найден' });
+      }
+      res.send(user);
+    })
+    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
 };
 
 // обновление профиля пользователя
