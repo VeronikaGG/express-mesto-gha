@@ -1,67 +1,111 @@
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  ERROR_CODE,
+} = require('../errors/errors');
 const Card = require('../models/card');
 
 // возвращает все карточки
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.send(cards))
-    .catch((err) => res.status(500).send({ message: `Ошибка: ${err}` }));
+    .then((cards) => {
+      res.status(200).send({ data: cards });
+    })
+    .catch(() => {
+      res
+        .status(ERROR_CODE)
+        .send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 // создаёт карточку
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
-  Card.create({ name, link, owner })
-    .then((card) => res.send(card))
-    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
-};
 
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => {
+      res.status(201).send({ data: card });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      } else {
+        res
+          .status(ERROR_CODE)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
+};
 // удаляет карточку по id
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    // eslint-disable-next-line consistent-return
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: 'Карточка не найдена' });
-      }
-      res.send(card);
+    .orFail(() => {
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
-    .catch((err) => res.status(500).send({ message: `Ошибка: ${err}` }));
+    .then((card) => {
+      res.status(200).send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      } else {
+        res
+          .status(ERROR_CODE)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 // поставить лайк карточке
 module.exports.likeCard = (req, res) => {
-  const userId = req.user._id;
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: userId } },
-    // eslint-disable-next-line comma-dangle
-    { new: true }
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
   )
-    // eslint-disable-next-line consistent-return
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: 'Карточка не найдена' });
-      }
-      res.send(card);
+    .orFail(() => {
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
+    .then((likes) => {
+      res.status(200).send({ data: likes });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      } else {
+        res
+          .status(ERROR_CODE)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
-
 // убрать лайк с карточки
 module.exports.dislikeCard = (req, res) => {
-  const userId = req.user._id;
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: userId } },
-    // eslint-disable-next-line comma-dangle
-    { new: true }
+    { $pull: { likes: req.user._id } },
+    { new: true },
   )
-    // eslint-disable-next-line consistent-return
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: 'Карточка не найдена' });
-      }
-      res.send(card);
+    .orFail(() => {
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
+    .then((likes) => {
+      res.status(200).send({ data: likes });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      } else {
+        res
+          .status(ERROR_CODE)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
