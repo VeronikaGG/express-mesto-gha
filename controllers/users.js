@@ -11,8 +11,14 @@ const User = require('../models/user');
 // возвращение всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => handleError(res, err));
+    .then((users) => {
+      res.status(200).send({ data: users });
+    })
+    .catch(() => {
+      res
+        .status(ERROR_CODE)
+        .send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 // возвращение пользователя по id
@@ -37,9 +43,22 @@ module.exports.getUserById = (req, res) => {
 // создание пользователя
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
+
   User.create({ name, about, avatar })
-    .then((user) => res.status(CREATE_CODE).send(user))
-    .catch((err) => handleError(err, res));
+    .then((user) => {
+      res.status(CREATE_CODE).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      } else {
+        res
+          .status(ERROR_CODE)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 // обновление профиля пользователя
