@@ -49,7 +49,12 @@ module.exports.createUser = (req, res) => {
       }
       res.send(user);
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
+    .catch(
+      (err) =>
+        // eslint-disable-next-line implicit-arrow-linebreak, comma-dangle
+        res.status(500).send({ message: `Ошибка: ${err.message}` })
+      // eslint-disable-next-line function-paren-newline
+    );
 };
 
 // обновление профиля пользователя
@@ -75,7 +80,12 @@ module.exports.updateUserProfile = (req, res) => {
       }
       res.send(user);
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
+    .catch(
+      (err) =>
+        // eslint-disable-next-line implicit-arrow-linebreak, comma-dangle
+        res.status(500).send({ message: `Ошибка: ${err.message}` })
+      // eslint-disable-next-line function-paren-newline
+    );
 };
 
 // обновление аватара пользователя
@@ -96,5 +106,10 @@ module.exports.updateUserAvatar = (req, res) => {
       }
       res.send(user);
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка: ${err}` }));
+    .catch(
+      (err) =>
+        // eslint-disable-next-line implicit-arrow-linebreak, comma-dangle
+        res.status(500).send({ message: `Ошибка: ${err.message}` })
+      // eslint-disable-next-line function-paren-newline
+    );
 };
