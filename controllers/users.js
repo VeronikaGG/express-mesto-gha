@@ -1,4 +1,3 @@
-const { handleError } = require('../errors/errors');
 const {
   CREATE_CODE,
   BAD_REQUEST,
@@ -22,21 +21,25 @@ module.exports.getUsers = (req, res) => {
 };
 
 // возвращение пользователя по id
-module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
+module.exports.getUser = (req, res) => {
+  const { userId } = req.params;
+  User.findById(userId)
+    .orFail(() => {
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
+    })
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
-      }
-      return res.status(200).send(user);
+      res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
+        res
           .status(BAD_REQUEST)
-          .send({ message: 'Неверный идентификатор пользователя' });
+          .send({ message: 'Переданы некорректные данные' });
+      } else {
+        res
+          .status(ERROR_CODE)
+          .send({ message: 'На сервере произошла ошибка' });
       }
-      return handleError(res, err);
     });
 };
 
