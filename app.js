@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3004 } = process.env;
 const app = express();
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
