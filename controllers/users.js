@@ -1,4 +1,5 @@
 const {
+  OK_CODE,
   CREATE_CODE,
   BAD_REQUEST,
   NOT_FOUND,
@@ -11,7 +12,7 @@ const User = require('../models/user');
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => {
-      res.status(200).send({ data: users });
+      res.status(OK_CODE).send({ data: users });
     })
     .catch(() => {
       res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
@@ -26,7 +27,7 @@ module.exports.getUserById = (req, res) => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.status(OK_CODE).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -71,7 +72,7 @@ module.exports.updateUserProfile = (req, res) => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.status(OK_CODE).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -97,7 +98,7 @@ module.exports.updateUserAvatar = (req, res) => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.status(OK_CODE).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {

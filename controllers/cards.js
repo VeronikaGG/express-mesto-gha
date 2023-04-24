@@ -1,4 +1,5 @@
 const {
+  OK_CODE,
   CREATE_CODE,
   BAD_REQUEST,
   NOT_FOUND,
@@ -11,7 +12,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => {
-      res.status(200).send({ data: cards });
+      res.status(OK_CODE).send({ data: cards });
     })
     .catch(() => {
       res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
@@ -43,7 +44,7 @@ module.exports.deleteCard = (req, res) => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
     .then((card) => {
-      res.status(200).send(card);
+      res.status(OK_CODE).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -66,7 +67,7 @@ module.exports.likeCard = (req, res) => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
     .then((likes) => {
-      res.status(200).send({ data: likes });
+      res.status(OK_CODE).send({ data: likes });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -89,7 +90,7 @@ module.exports.dislikeCard = (req, res) => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
     .then((likes) => {
-      res.status(200).send({ data: likes });
+      res.status(OK_CODE).send({ data: likes });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
