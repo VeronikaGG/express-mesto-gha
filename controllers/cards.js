@@ -11,6 +11,7 @@ const Card = require('../models/card');
 // возвращает все карточки
 module.exports.getCards = (req, res) => {
   Card.find({})
+    .populate('owner')
     .then((cards) => {
       res.status(OK_CODE).send({ data: cards });
     })
@@ -37,6 +38,7 @@ module.exports.createCard = (req, res) => {
       }
     });
 };
+
 // удаляет карточку по id
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
@@ -63,22 +65,22 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .populate('likes')
     .orFail(() => {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
     })
-    .then((likes) => {
-      res.status(OK_CODE).send({ data: likes });
+    .then((card) => {
+      res.status(OK_CODE).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
+
 // убрать лайк с карточки
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
