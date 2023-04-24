@@ -19,7 +19,7 @@ module.exports.getUsers = (req, res) => {
 };
 
 // возвращение пользователя по id
-module.exports.getUser = (req, res) => {
+module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(() => {
