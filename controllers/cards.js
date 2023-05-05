@@ -30,22 +30,29 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
-    .orFail(new NotFoundError('Карточка не найдена'))
+    .orFail(() => {
+      throw new NotFoundError('Нет карточки по заданному id');
+    })
     .then((card) => {
-      if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('У вас нет прав на удаление этой карточки');
+      if (!card.owner.equals(req.user._id)) {
+        throw new ForbiddenError('Нельзя удалить чужую карточку');
+      } else {
+        return Card.deleteOne(card).then(() => res.send({ data: card }));
       }
-      return card.remove()
-        .then(() => res.send({ data: card }));
     })
     .catch(next);
 };
 // обновление массива лайков в БД
 const updateLikes = (req, res, data, next) => {
-  Card.findByIdAndUpdate(req.params.cardId, data, { new: true })
-    .orFail()
-    .then((card) => card.populate(['owner', 'likes']))
-    .then((card) => res.send(card))
+  const { cardId } = req.params;
+  Card.findByIdAndUpdate(cardId, data, { new: true })
+    .orFail(() => {
+      throw new NotFoundError('Нет карточки по заданному id');
+    })
+    .populate(['owner', 'likes'])
+    .then((likes) => {
+      res.send({ data: likes });
+    })
     .catch(next);
 };
 

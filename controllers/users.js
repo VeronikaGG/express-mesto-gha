@@ -12,7 +12,6 @@ module.exports.getUsers = (req, res, next) => {
     })
     .catch(next);
 };
-
 // поиск пользователя по id
 const getUserById = (req, res, data, next) => {
   User.findById(data)
