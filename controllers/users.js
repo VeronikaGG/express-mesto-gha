@@ -28,7 +28,6 @@ module.exports.getUser = (req, res, next) => {
   const data = req.params.userId;
   getUserById(req, res, data, next);
 };
-
 // получение информации о текущем пользователе
 module.exports.getUserInfo = (req, res, next) => {
   const data = req.user._id;
@@ -37,13 +36,11 @@ module.exports.getUserInfo = (req, res, next) => {
 // создание пользователя
 module.exports.createUser = (req, res, next) => {
   const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
+    name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10)
+
+  bcrypt
+    .hash(password, 10)
     .then((hash) => User.create({
       name,
       about,
@@ -52,9 +49,9 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      const data = user.toObject();
-      delete data.password;
-      res.status(CREATE_CODE).send(data);
+      const userData = user.toObject();
+      delete userData.password;
+      res.status(CREATE_CODE).send(userData);
     })
     .catch(next);
 };
