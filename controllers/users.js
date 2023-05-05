@@ -1,13 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
-const {
-  OK_CODE,
-  CREATE_CODE,
-  BAD_REQUEST,
-  NOT_FOUND,
-  ERROR_CODE,
-} = require('../utils/constants');
+const { CREATE_CODE } = require('../utils/constants');
 
 const User = require('../models/user');
 
@@ -62,58 +55,26 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch(next);
 };
-
-// обновление профиля пользователя
-module.exports.updateUserProfile = (req, res) => {
-  const { name, about } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { name, about },
-    { new: true, runValidators: true },
-  )
-    .orFail(() => {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
-    })
-    .then((user) => {
-      res.status(OK_CODE).send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+// обновление информации о пользователе в БД
+const updateUser = (req, res, data, next) => {
+  User.findByIdAndUpdate(req.user._id, data, { new: true, runValidators: true })
+    .orFail()
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
-// обновление аватара пользователя
-module.exports.updateUserAvatar = (req, res) => {
-  const { avatar } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    { new: true, runValidators: true },
-  )
-    .orFail(() => {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
-    })
-    .then((user) => {
-      res.status(OK_CODE).send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+// обновление информ о пользователе
+module.exports.updateUserProfile = (req, res, next) => {
+  const data = req.body;
+  updateUser(req, res, data, next);
 };
+
+// обновление аватара
+module.exports.updateUserAvatar = (req, res, next) => {
+  const data = req.body;
+  updateUser(req, res, data, next);
+};
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 

@@ -41,7 +41,7 @@ module.exports.deleteCard = (req, res, next) => {
     .catch(next);
 };
 // обновление массива лайков в БД
-const UpdateLikes = (req, res, data, next) => {
+const updateLikes = (req, res, data, next) => {
   Card.findByIdAndUpdate(req.params.cardId, data, { new: true })
     .orFail()
     .then((card) => card.populate(['owner', 'likes']))
@@ -53,12 +53,12 @@ const UpdateLikes = (req, res, data, next) => {
 module.exports.likeCard = (req, res, next) => {
   const ownerId = req.user._id;
   const updateData = { $addToSet: { likes: ownerId } };
-  UpdateLikes(req, res, updateData, next);
+  updateLikes(req, res, updateData, next);
 };
 
 // убрать лайк
 module.exports.dislikeCard = (req, res, next) => {
   const ownerId = req.user._id;
   const updateData = { $pull: { likes: ownerId } };
-  UpdateLikes(req, res, updateData, next);
+  updateLikes(req, res, updateData, next);
 };

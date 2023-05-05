@@ -9,7 +9,7 @@ const indexRouter = require('./routes/index');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const handelErrors = require('./middlewares/handelErrors');
-const { userValidation, loginValidation } = require('./middlewares/requestValidation');
+const { usersValidation, loginValidation } = require('./middlewares/requestValidation');
 
 app.use(express.json());
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
@@ -18,7 +18,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 
 app.use('/', indexRouter);
 app.post('/signin', loginValidation, login);
-app.post('/signup', userValidation, createUser);
+app.post('/signup', usersValidation, createUser);
 app.use(cookieParser());
 app.use(auth);
 app.use(handelErrors);
