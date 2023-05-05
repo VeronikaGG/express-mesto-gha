@@ -1,106 +1,64 @@
-const {
-  OK_CODE,
-  CREATE_CODE,
-  BAD_REQUEST,
-  NOT_FOUND,
-  ERROR_CODE,
-} = require('../errors/errors');
+const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
+const { OK_CODE } = require('../utils/constants');
 
 const Card = require('../models/card');
 
 // возвращает все карточки
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .populate('owner')
+    .populate(['owner', 'likes'])
     .then((cards) => {
-      res.status(OK_CODE).send({ data: cards });
+      res.send({ data: cards });
     })
-    .catch(() => {
-      res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
 // создаёт карточку
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => {
-      res.status(CREATE_CODE).send({ data: card });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
-};
-
-// удаляет карточку по id
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(() => {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
-    })
-    .then((card) => {
-      res.status(OK_CODE).send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
-};
-// поставить лайк карточке
-module.exports.likeCard = (req, res) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true },
-  )
-    .populate('likes')
-    .orFail(() => {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
-    })
+    .then((card) => card.populate('owner'))
     .then((card) => {
       res.status(OK_CODE).send({ data: card });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-// убрать лайк с карточки
-module.exports.dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true },
-  )
-    .orFail(() => {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемый объект не найден' });
-    })
-    .then((likes) => {
-      res.status(OK_CODE).send({ data: likes });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
+// удаляет карточку по id
+module.exports.deleteCard = (req, res, next) => {
+  const { cardId } = req.params;
+  Card.findById(cardId)
+    .orFail(new NotFoundError('Карточка не найдена'))
+    .then((card) => {
+      if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('У вас нет прав на удаление этой карточки');
       }
-    });
+      return card.remove()
+        .then(() => res.send({ data: card }));
+    })
+    .catch(next);
+};
+// обновление массива лайков в БД
+const UpdateLikes = (req, res, data, next) => {
+  Card.findByIdAndUpdate(req.params.cardId, data, { new: true })
+    .orFail()
+    .then((card) => card.populate(['owner', 'likes']))
+    .then((card) => res.send(card))
+    .catch(next);
+};
+
+// поставить лайк
+module.exports.likeCard = (req, res, next) => {
+  const ownerId = req.user._id;
+  const updateData = { $addToSet: { likes: ownerId } };
+  UpdateLikes(req, res, updateData, next);
+};
+
+// убрать лайк
+module.exports.dislikeCard = (req, res, next) => {
+  const ownerId = req.user._id;
+  const updateData = { $pull: { likes: ownerId } };
+  UpdateLikes(req, res, updateData, next);
 };
