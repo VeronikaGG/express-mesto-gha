@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { CREATE_CODE } = require('../utils/constants');
-
+const NotFoundError = require('../errors/notFoundError');
 const User = require('../models/user');
 
 // возвращение всех пользователей
@@ -16,8 +16,12 @@ module.exports.getUsers = (req, res, next) => {
 // поиск пользователя по id
 const getUserById = (req, res, data, next) => {
   User.findById(data)
-    .orFail()
-    .then((user) => res.send(user))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден');
+    })
+    .then((user) => {
+      res.send({ data: user });
+    })
     .catch(next);
 };
 // получение информации о конкретном пользователе
@@ -57,9 +61,14 @@ module.exports.createUser = (req, res, next) => {
 };
 // обновление информации о пользователе в БД
 const updateUser = (req, res, data, next) => {
-  User.findByIdAndUpdate(req.user._id, data, { new: true, runValidators: true })
-    .orFail()
-    .then((user) => res.send(user))
+  const userId = req.user._id;
+  User.findByIdAndUpdate(userId, data, { new: true, runValidators: true })
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден');
+    })
+    .then((user) => {
+      res.send({ data: user });
+    })
     .catch(next);
 };
 
