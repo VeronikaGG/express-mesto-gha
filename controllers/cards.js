@@ -1,11 +1,9 @@
 const NotFoundError = require('../errors/notFoundError');
 const ForbiddenError = require('../errors/forbiddenError');
 const { OK_CODE } = require('../utils/constants');
-
 const Card = require('../models/card');
 
-// возвращает все карточки
-module.exports.getCards = (req, res, next) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => {
@@ -14,8 +12,7 @@ module.exports.getCards = (req, res, next) => {
     .catch(next);
 };
 
-// создаёт карточку
-module.exports.createCard = (req, res, next) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
@@ -26,8 +23,7 @@ module.exports.createCard = (req, res, next) => {
     .catch(next);
 };
 
-// удаляет карточку по id
-module.exports.deleteCard = (req, res, next) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
     .orFail(() => {
@@ -42,8 +38,8 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .catch(next);
 };
-// обновление массива лайков в БД
-const updateLikes = (req, res, data, next) => {
+
+const handleLikes = (req, res, data, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, data, { new: true })
     .orFail(() => {
@@ -56,16 +52,20 @@ const updateLikes = (req, res, data, next) => {
     .catch(next);
 };
 
-// поставить лайк
-module.exports.likeCard = (req, res, next) => {
-  const ownerId = req.user._id;
-  const updateData = { $addToSet: { likes: ownerId } };
-  updateLikes(req, res, updateData, next);
+const likeCard = (req, res, next) => {
+  const data = { $addToSet: { likes: req.user._id } };
+  handleLikes(req, res, data, next);
 };
 
-// убрать лайк
-module.exports.dislikeCard = (req, res, next) => {
-  const ownerId = req.user._id;
-  const updateData = { $pull: { likes: ownerId } };
-  updateLikes(req, res, updateData, next);
+const deleteCardLike = (req, res, next) => {
+  const data = { $pull: { likes: req.user._id } };
+  handleLikes(req, res, data, next);
+};
+
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  deleteCardLike,
 };

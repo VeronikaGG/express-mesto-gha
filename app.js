@@ -5,21 +5,21 @@ const { PORT = 3000 } = process.env;
 const app = express();
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-
-const indexRouter = require('./routes/index');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { loginValidation, userValidation } = require('./middlewares/requestValidation');
 const handelErrors = require('./middlewares/handelErrors');
-const { usersValidation, loginValidation } = require('./middlewares/requestValidation');
+const routes = require('./routes/index');
 
-app.use('/', indexRouter);
 app.post('/signin', loginValidation, login);
-app.post('/signup', usersValidation, createUser);
+app.post('/signup', userValidation, createUser);
 app.use(cookieParser());
 app.use(auth);
-app.use(handelErrors);
+app.use(routes);
 app.use(errors());
+app.use(handelErrors);
+
+app.listen(PORT);
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
 });
-app.listen(PORT);
