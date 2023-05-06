@@ -11,6 +11,8 @@ const { loginValidation, userValidation } = require('./middlewares/requestValida
 const handelErrors = require('./middlewares/handelErrors');
 const routes = require('./routes/index');
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 app.use(cookieParser());
