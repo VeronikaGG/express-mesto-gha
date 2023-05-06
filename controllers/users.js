@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { CREATE_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
+
 const User = require('../models/user');
 
 // возвращение всех пользователей

@@ -8,7 +8,7 @@ const { errors } = require('celebrate');
 
 const indexRouter = require('./routes/index');
 const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
+// const auth = require('./middlewares/auth');
 const handelErrors = require('./middlewares/handelErrors');
 const { usersValidation, loginValidation } = require('./middlewares/requestValidation');
 
@@ -16,7 +16,7 @@ app.use('/', indexRouter);
 app.post('/signin', loginValidation, login);
 app.post('/signup', usersValidation, createUser);
 app.use(cookieParser());
-app.use(auth);
+// app.use(auth);
 app.use(handelErrors);
 app.use(errors());
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
