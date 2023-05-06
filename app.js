@@ -12,7 +12,7 @@ const auth = require('./middlewares/auth');
 const handelErrors = require('./middlewares/handelErrors');
 const { usersValidation, loginValidation } = require('./middlewares/requestValidation');
 
-app.use(indexRouter);
+app.use('/', indexRouter);
 app.post('/signin', loginValidation, login);
 app.post('/signup', usersValidation, createUser);
 app.use(cookieParser());

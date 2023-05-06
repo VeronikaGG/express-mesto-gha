@@ -33,7 +33,7 @@ module.exports.getUserInfo = (req, res, next) => {
   const data = req.user._id;
   getUserById(req, res, data, next);
 };
-// создание пользователя
+// регистрация пользователя
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
@@ -79,7 +79,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
   const data = req.body;
   updateUser(req, res, data, next);
 };
-// логин
+// аутентификация
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
