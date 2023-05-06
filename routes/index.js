@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const usersRouter = require('./users');
-const cardsRouter = require('./cards');
-const auth = require('../middlewares/auth');
-// const NotFoundError = require('../errors/notFoundError');
+const userRouter = require('./users');
+const cardRouter = require('./cards');
+const NotFoundError = require('../errors/notFoundError');
 
-router.use('/users', auth, usersRouter);
-router.use('/cards', auth, cardsRouter);
-router.use('*', auth, (req, res) => {
-  res.status(404).send({ message: 'Страница не найдена' });
+router.use('/users', userRouter);
+router.use('/cards', cardRouter);
+router.use('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
+
 module.exports = router;

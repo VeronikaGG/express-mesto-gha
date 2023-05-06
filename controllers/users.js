@@ -1,97 +1,71 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { CREATE_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
+const { OK_CODE } = require('../utils/constants');
+const Card = require('../models/card');
 
-const User = require('../models/user');
-
-// возвращение всех пользователей
-module.exports.getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => {
-      res.send({ data: users });
+const getCards = (req, res, next) => {
+  Card.find({})
+    .populate(['owner', 'likes'])
+    .then((cards) => {
+      res.send({ data: cards });
     })
     .catch(next);
 };
-// поиск пользователя по id
-const getUserById = (req, res, data, next) => {
-  User.findById(data)
+
+const createCard = (req, res, next) => {
+  const { name, link } = req.body;
+
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => card.populate('owner'))
+    .then((card) => {
+      res.status(OK_CODE).send({ data: card });
+    })
+    .catch(next);
+};
+
+const deleteCard = (req, res, next) => {
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .orFail(() => {
-      throw new NotFoundError('Пользователь не найден');
+      throw new NotFoundError('Нет карточки по заданному id');
     })
-    .then((user) => {
-      res.send({ data: user });
+    .then((card) => {
+      if (!card.owner.equals(req.user._id)) {
+        throw new ForbiddenError('Нельзя удалить чужую карточку');
+      } else {
+        return Card.deleteOne(card).then(() => res.send({ data: card }));
+      }
     })
     .catch(next);
 };
-// получение информации о конкретном пользователе
-module.exports.getUser = (req, res, next) => {
-  const data = req.params.userId;
-  getUserById(req, res, data, next);
-};
-// получение информации о текущем пользователе
-module.exports.getUserInfo = (req, res, next) => {
-  const data = req.user._id;
-  getUserById(req, res, data, next);
-};
-// регистрация пользователя
-module.exports.createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
 
-  bcrypt
-    .hash(password, 10)
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    }))
-    .then((user) => {
-      const userData = user.toObject();
-      delete userData.password;
-      res.status(CREATE_CODE).send(userData);
-    })
-    .catch(next);
-};
-// обновление информации о пользователе в БД
-const updateUser = (req, res, data, next) => {
-  const userId = req.user._id;
-  User.findByIdAndUpdate(userId, data, { new: true, runValidators: true })
+const handleLikes = (req, res, data, next) => {
+  const { cardId } = req.params;
+  Card.findByIdAndUpdate(cardId, data, { new: true })
     .orFail(() => {
-      throw new NotFoundError('Пользователь не найден');
+      throw new NotFoundError('Нет карточки по заданному id');
     })
-    .then((user) => {
-      res.send({ data: user });
-    })
-    .catch(next);
-};
-
-// обновление информ о пользователе
-module.exports.updateUserProfile = (req, res, next) => {
-  const data = req.body;
-  updateUser(req, res, data, next);
-};
-
-// обновление аватара
-module.exports.updateUserAvatar = (req, res, next) => {
-  const data = req.body;
-  updateUser(req, res, data, next);
-};
-// аутентификация
-module.exports.login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      res.cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 7,
-        httpOnly: true,
-      })
-        .send({ message: 'Аутентификация прошла успешно' });
+    .populate(['owner', 'likes'])
+    .then((likes) => {
+      res.send({ data: likes });
     })
     .catch(next);
+};
+
+const likeCard = (req, res, next) => {
+  const data = { $addToSet: { likes: req.user._id } };
+  handleLikes(req, res, data, next);
+};
+
+const deleteCardLike = (req, res, next) => {
+  const data = { $pull: { likes: req.user._id } };
+  handleLikes(req, res, data, next);
+};
+
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  deleteCardLike,
 };
