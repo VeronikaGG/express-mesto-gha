@@ -17,7 +17,7 @@ app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 app.use(cookieParser());
 app.use(auth);
-app.use('/', indexRouter);
+app.use(indexRouter);
 app.use(errors());
 app.use(handelErrors);
 
