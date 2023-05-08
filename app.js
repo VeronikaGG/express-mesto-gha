@@ -11,6 +11,9 @@ const { loginValidation, userValidation } = require('./middlewares/requestValida
 const handelErrors = require('./middlewares/handelErrors');
 const indexRouter = require('./routes/index');
 
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+  useNewUrlParser: true,
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.post('/signin', loginValidation, login);
@@ -22,6 +25,3 @@ app.use(errors());
 app.use(handelErrors);
 
 app.listen(PORT);
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
-  useNewUrlParser: true,
-});

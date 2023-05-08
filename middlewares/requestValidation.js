@@ -10,6 +10,12 @@ const userValidation = celebrate({
     password: Joi.string().required(),
   }),
 });
+const loginValidation = celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+});
 
 const profileValidation = celebrate({
   body: Joi.object().keys({
@@ -33,13 +39,6 @@ const cardIdValidation = celebrate({
 const avatarValidation = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().pattern(REGEXP).required(),
-  }),
-});
-
-const loginValidation = celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
   }),
 });
 

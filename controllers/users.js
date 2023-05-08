@@ -4,17 +4,15 @@ const User = require('../models/user');
 const { OK_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
 
-const secretKey = process.env.SECRET_KEY;
-
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const newtoken = jwt.sign({ _id: user._id }, secretKey, {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
         expiresIn: '7d',
       });
-      res.cookie('jwt', newtoken, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+      res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
         .send({ message: 'Аутентификация успешна!' });
     })
     .catch(next);
