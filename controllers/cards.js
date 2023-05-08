@@ -52,21 +52,13 @@ const handleLikes = (req, res, data, next) => {
     })
     .catch(next);
 };
-
+// обертка
 module.exports.likeCard = (req, res, next) => {
   const data = { $addToSet: { likes: req.user._id } };
   handleLikes(req, res, data, next);
 };
-
+// обертка
 module.exports.deleteCardLike = (req, res, next) => {
   const data = { $pull: { likes: req.user._id } };
   handleLikes(req, res, data, next);
 };
-
-// module.exports = {
-//   getCards,
-//   createCard,
-//   deleteCard,
-//   likeCard,
-//   deleteCardLike,
-// };

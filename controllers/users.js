@@ -37,12 +37,12 @@ const findUserById = (req, res, data, next) => {
     })
     .catch(next);
 };
-
+// обертка
 module.exports.getUser = (req, res, next) => {
   const data = req.params.userId;
   findUserById(req, res, data, next);
 };
-
+// обертка
 module.exports.getUserProfile = (req, res, next) => {
   const data = req.user._id;
   findUserById(req, res, data, next);
@@ -82,23 +82,13 @@ const handleUserUpdate = (req, res, data, next) => {
     })
     .catch(next);
 };
-
+// обертка
 module.exports.updateUserInfo = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
-
+// обертка
 module.exports.updateUserAvatar = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
-
-// module.exports = {
-//   getUsers,
-//   getUser,
-//   getUserProfile,
-//   createUser,
-//   updateUserInfo,
-//   updateUserAvatar,
-//   login,
-// };
