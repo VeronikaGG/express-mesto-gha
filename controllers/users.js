@@ -12,7 +12,7 @@ const getUsers = (req, res, next) => {
     .catch(next);
 };
 
-const handleSearchById = (req, res, data, next) => {
+const findUserById = (req, res, data, next) => {
   User.findById(data)
     .orFail(() => {
       throw new NotFoundError('Пользователь не найден');
@@ -25,14 +25,14 @@ const handleSearchById = (req, res, data, next) => {
 
 const getUser = (req, res, next) => {
   const data = req.params.userId;
-  handleSearchById(req, res, data, next);
+  findUserById(req, res, data, next);
 };
 
-const getCurrentUser = (req, res, next) => {
+const getUserProfile = (req, res, next) => {
   const data = req.user._id;
-  handleSearchById(req, res, data, next);
+  findUserById(req, res, data, next);
 };
-
+// Добавление пользователя с существующим email в БД
 const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
@@ -67,12 +67,12 @@ const handleUserUpdate = (req, res, data, next) => {
     .catch(next);
 };
 
-const updateProfile = (req, res, next) => {
+const updateUserInfo = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
 
-const updateAvatar = (req, res, next) => {
+const updateUserAvatar = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
@@ -82,7 +82,7 @@ const login = (req, res, next) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+      const token = jwt.sign({ _id: user._id }, 'super-secret-key', {
         expiresIn: '7d',
       });
 
@@ -99,9 +99,9 @@ const login = (req, res, next) => {
 module.exports = {
   getUsers,
   getUser,
-  getCurrentUser,
+  getUserProfile,
   createUser,
-  updateProfile,
-  updateAvatar,
+  updateUserInfo,
+  updateUserAvatar,
   login,
 };

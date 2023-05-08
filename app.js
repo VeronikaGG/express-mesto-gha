@@ -9,7 +9,7 @@ const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { loginValidation, userValidation } = require('./middlewares/requestValidation');
 const handelErrors = require('./middlewares/handelErrors');
-const routes = require('./routes/index');
+const indexRouter = require('./routes/index');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,7 +17,7 @@ app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 app.use(cookieParser());
 app.use(auth);
-app.use(routes);
+app.use('/', indexRouter);
 app.use(errors());
 app.use(handelErrors);
 
