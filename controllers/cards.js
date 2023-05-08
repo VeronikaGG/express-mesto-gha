@@ -3,7 +3,8 @@ const ForbiddenError = require('../errors/forbiddenError');
 const { OK_CODE } = require('../utils/constants');
 const Card = require('../models/card');
 
-const getCards = (req, res, next) => {
+// возвращает все карточки
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => {
@@ -11,8 +12,8 @@ const getCards = (req, res, next) => {
     })
     .catch(next);
 };
-
-const createCard = (req, res, next) => {
+// создаёт карточку
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
@@ -22,8 +23,8 @@ const createCard = (req, res, next) => {
     })
     .catch(next);
 };
-
-const deleteCard = (req, res, next) => {
+// удаляет карточку по id
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
     .orFail(() => {
@@ -38,7 +39,7 @@ const deleteCard = (req, res, next) => {
     })
     .catch(next);
 };
-
+// поставить и удалить лайк карточке
 const handleLikes = (req, res, data, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, data, { new: true })
@@ -52,20 +53,20 @@ const handleLikes = (req, res, data, next) => {
     .catch(next);
 };
 
-const likeCard = (req, res, next) => {
+module.exports.likeCard = (req, res, next) => {
   const data = { $addToSet: { likes: req.user._id } };
   handleLikes(req, res, data, next);
 };
 
-const deleteCardLike = (req, res, next) => {
+module.exports.deleteCardLike = (req, res, next) => {
   const data = { $pull: { likes: req.user._id } };
   handleLikes(req, res, data, next);
 };
 
-module.exports = {
-  getCards,
-  createCard,
-  deleteCard,
-  likeCard,
-  deleteCardLike,
-};
+// module.exports = {
+//   getCards,
+//   createCard,
+//   deleteCard,
+//   likeCard,
+//   deleteCardLike,
+// };

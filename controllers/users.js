@@ -4,7 +4,8 @@ const User = require('../models/user');
 const { OK_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
 
-const login = (req, res, next) => {
+// аутентификация
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -17,19 +18,19 @@ const login = (req, res, next) => {
     })
     .catch(next);
 };
-
-const getUsers = (req, res, next) => {
+// возвращение всех пользователей
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send({ data: users });
     })
     .catch(next);
 };
-
+// возвращение пользователя по id
 const findUserById = (req, res, data, next) => {
   User.findById(data)
     .orFail(() => {
-      throw new NotFoundError('Пользователь не найден');
+      throw new NotFoundError('Нет пользователя с таким id');
     })
     .then((user) => {
       res.send({ data: user });
@@ -37,18 +38,18 @@ const findUserById = (req, res, data, next) => {
     .catch(next);
 };
 
-const getUser = (req, res, next) => {
+module.exports.getUser = (req, res, next) => {
   const data = req.params.userId;
   findUserById(req, res, data, next);
 };
 
-const getUserProfile = (req, res, next) => {
+module.exports.getUserProfile = (req, res, next) => {
   const data = req.user._id;
   findUserById(req, res, data, next);
 };
 
 // Добавление пользователя с существующим email в БД
-const createUser = (req, res, next) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -69,7 +70,7 @@ const createUser = (req, res, next) => {
     })
     .catch(next);
 };
-
+// обновление профиля пользователя
 const handleUserUpdate = (req, res, data, next) => {
   const userId = req.user._id;
   User.findByIdAndUpdate(userId, data, { new: true, runValidators: true })
@@ -82,22 +83,22 @@ const handleUserUpdate = (req, res, data, next) => {
     .catch(next);
 };
 
-const updateUserInfo = (req, res, next) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
 
-const updateUserAvatar = (req, res, next) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
 
-module.exports = {
-  getUsers,
-  getUser,
-  getUserProfile,
-  createUser,
-  updateUserInfo,
-  updateUserAvatar,
-  login,
-};
+// module.exports = {
+//   getUsers,
+//   getUser,
+//   getUserProfile,
+//   createUser,
+//   updateUserInfo,
+//   updateUserAvatar,
+//   login,
+// };

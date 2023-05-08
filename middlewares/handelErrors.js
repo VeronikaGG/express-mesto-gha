@@ -22,7 +22,7 @@ module.exports = ((err, req, res, next) => {
   }
 
   if (err.code === 11000) {
-    return res.status(CONFLICT_ERROR).send({ message: 'Пользователь с таким почтовым адресом уже зарегистрирован' });
+    return res.status(CONFLICT_ERROR).send({ message: 'Пользователь с таким email уже существует' });
   }
 
   res.status(ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
