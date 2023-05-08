@@ -1,8 +1,27 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const NotFoundError = require('../errors/notFoundError');
 const { OK_CODE } = require('../utils/constants');
+const NotFoundError = require('../errors/notFoundError');
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+        expiresIn: '7d',
+      });
+
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .send({ message: 'Аутентификация успешна!' });
+    })
+    .catch(next);
+};
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -32,6 +51,7 @@ const getUserProfile = (req, res, next) => {
   const data = req.user._id;
   findUserById(req, res, data, next);
 };
+
 // Добавление пользователя с существующим email в БД
 const createUser = (req, res, next) => {
   const {
@@ -75,25 +95,6 @@ const updateUserInfo = (req, res, next) => {
 const updateUserAvatar = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
-};
-
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-secret-key', {
-        expiresIn: '7d',
-      });
-
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-        })
-        .send({ message: 'Аутентификация успешна!' });
-    })
-    .catch(next);
 };
 
 module.exports = {
