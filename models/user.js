@@ -20,7 +20,6 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      required: [true, 'Поле "avatar" должно быть заполнено'],
       validate: {
         validator: (v) => REGEXP.test(v),
         message: 'Неправильный формат ссылки',

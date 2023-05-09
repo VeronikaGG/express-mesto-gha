@@ -19,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 app.use(cookieParser());
+app.get('/signout', (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход' });
+});
 app.use(auth);
 app.use('/', indexRouter);
 app.use(errors());
