@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { OK_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
+const BadRequestError = require('../errors/badRequestError');
+const ConflictError = require('../errors/conflictError');
 
 // аутентификация
 module.exports.login = (req, res, next) => {
@@ -68,7 +70,15 @@ module.exports.createUser = (req, res, next) => {
       delete userData.password;
       res.status(OK_CODE).send(userData);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Такой пользователь уже существует'));
+      } else {
+        next(err);
+      }
+    });
 };
 // обновление профиля пользователя
 const handleUserUpdate = (req, res, data, next) => {

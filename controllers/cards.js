@@ -1,7 +1,7 @@
 const NotFoundError = require('../errors/notFoundError');
 const ForbiddenError = require('../errors/forbiddenError');
 const BadRequestError = require('../errors/badRequestError');
-// const { OK_CODE } = require('../utils/constants');
+const { OK_CODE } = require('../utils/constants');
 const Card = require('../models/card');
 
 // возвращает все карточки
@@ -18,7 +18,7 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send({ data: card }))
+    .then((card) => res.status(OK_CODE).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
