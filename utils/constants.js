@@ -7,7 +7,7 @@ const UNAUTHORIZED_ERROR = 401;
 const FORBIDDEN_ERROR = 403;
 const CONFLICT_ERROR = 409;
 const REGEXP = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()€-]{1,67}(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)?$/;
-const { NODE_ENV, JWT_SECRET_KEY } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 module.exports = {
   OK_CODE,
   CREATE_CODE,
@@ -19,5 +19,5 @@ module.exports = {
   CONFLICT_ERROR,
   REGEXP,
   NODE_ENV,
-  JWT_SECRET_KEY,
+  JWT_SECRET,
 };
