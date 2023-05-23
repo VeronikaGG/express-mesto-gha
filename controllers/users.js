@@ -5,6 +5,7 @@ const { OK_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
+const { NODE_ENV, JWT_SECRET_KEY } = require('../utils/constants');
 
 // аутентификация
 module.exports.login = (req, res, next) => {
@@ -12,9 +13,13 @@ module.exports.login = (req, res, next) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
-        expiresIn: '7d',
-      });
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET_KEY : 'some-secret-key',
+        {
+          expiresIn: '7d',
+        },
+      );
       res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
         .send({ message: 'Аутентификация успешна!' });
     })
