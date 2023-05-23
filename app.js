@@ -12,12 +12,14 @@ const { loginValidation, userValidation } = require('./middlewares/requestValida
 const handelErrors = require('./middlewares/handelErrors');
 const indexRouter = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
 });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors);
 app.use(requestLogger);
 
 app.get('/crash-test', () => {
