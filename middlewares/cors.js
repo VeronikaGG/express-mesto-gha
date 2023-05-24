@@ -1,10 +1,11 @@
 const allowedCors = [
   'https://veronikagg.student.nomoredomains.monster',
-  'http://veronikagg.student.nomoredomains.monster',
+  'https://api.veronikagg.student.nomoredomains.monster',
+  'https://localhost:3000',
   'http://localhost:3000',
 ];
 
-module.exports = (req, res, next) => {
+const cors = (req, res, next) => {
   const { origin } = req.headers;
   const { method } = req;
   const requestHeaders = req.headers['access-control-request-headers'];
@@ -24,3 +25,5 @@ module.exports = (req, res, next) => {
 
   return next();
 };
+
+module.exports = cors;

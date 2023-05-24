@@ -11,8 +11,8 @@ const auth = require('./middlewares/auth');
 const { loginValidation, userValidation } = require('./middlewares/requestValidation');
 const handelErrors = require('./middlewares/handelErrors');
 const indexRouter = require('./routes/index');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
 const cors = require('./middlewares/cors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
