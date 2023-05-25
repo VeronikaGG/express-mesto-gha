@@ -107,3 +107,12 @@ module.exports.updateUserAvatar = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
+module.exports.signOut = (req, res, next) => {
+  res
+    .clearCookie('jwt', {
+      maxAge: 3600000 * 24 * 7,
+      httpOnly: true,
+    })
+    .send({ message: 'Вы вышли из профиля ' })
+    .catch(next);
+};
