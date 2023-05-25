@@ -5,7 +5,7 @@ const { OK_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
-const { NODE_ENV, JWT_SECRET_KEY } = require('../utils/constants');
+const { NODE_ENV, JWT_SECRET } = require('../utils/constants');
 
 // аутентификация
 module.exports.login = (req, res, next) => {
@@ -15,7 +15,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET_KEY : 'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
         {
           expiresIn: '7d',
         },
