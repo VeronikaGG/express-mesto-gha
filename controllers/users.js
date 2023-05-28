@@ -9,23 +9,52 @@ const AuthorizationError = require('../errors/authorizationError');
 const { NODE_ENV, JWT_SECRET } = require('../utils/constants');
 
 // аутентификация
+// module.exports.login = (req, res, next) => {
+//   const { email, password } = req.body;
+//   User.findOne({ email })
+//     .select('+password')
+//     .then((user) => {
+//       if (!user) {
+//         throw new AuthorizationError('Некорректные email или пароль');
+//       }
+//       return bcrypt.compare(password, user.password).then((matched) => {
+//         if (!matched) {
+//           throw new AuthorizationError('Некорректные email или пароль');
+//         }
+// eslint-disable-next-line max-len
+//         const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', {
+//           expiresIn: '7d',
+//         });
+//         res.send({ token });
+//       });
+//     })
+//     .catch((err) => {
+//       next(err);
+//     });
+// };
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email })
-    .select('+password')
+
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
-        throw new AuthorizationError('Некорректные email или пароль');
+        return Promise.reject(new AuthorizationError('Неправильные email или password'));
       }
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          throw new AuthorizationError('Некорректные email или пароль');
-        }
-        const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', {
-          expiresIn: '7d',
-        });
-        res.send({ token });
-      });
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+        { expiresIn: '7d' },
+      );
+
+      res.send({ token });
+      return bcrypt.compare(password, user.password);
+    })
+    .then((matched) => {
+      if (!matched) {
+        Promise.reject(new AuthorizationError('Неправильные email или password'));
+        return;
+      }
+      res.send({ message: 'Всё верно!' });
     })
     .catch((err) => {
       next(err);
