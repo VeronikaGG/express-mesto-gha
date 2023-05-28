@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 
 const { PORT = 3000 } = process.env;
 const app = express();
-// const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -31,14 +30,13 @@ app.get('/crash-test', () => {
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
-// app.use(cookieParser());
-// app.get('/signout', (req, res) => {
-//   res.clearCookie('jwt').send({ message: 'Выход' });
-// });
 app.use(errorLogger);
 app.use(auth);
 app.use('/', indexRouter);
 app.use(errors());
 app.use(handelErrors);
 
-app.listen(PORT);
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`The server is running on ${PORT}`);
+});

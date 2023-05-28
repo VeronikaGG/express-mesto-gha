@@ -9,16 +9,20 @@ module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => {
-      res.send({ data: cards });
+      res.send(cards);
     })
     .catch(next);
 };
 // создаёт карточку
 module.exports.createCard = (req, res, next) => {
+  const { _id } = req.user;
   const { name, link } = req.body;
-  const owner = req.user._id;
-  Card.create({ name, link, owner })
-    .then((card) => res.status(OK_CODE).send({ data: card }))
+  Card.create({ name, link, owner: _id })
+    .then((newCard) => {
+      Card.findOne(newCard)
+        .populate(['owner'])
+        .then((card) => res.status(OK_CODE).send(card));
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
@@ -38,7 +42,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         throw new ForbiddenError('Нельзя удалить чужую карточку');
       } else {
-        return Card.deleteOne(card).then(() => res.send({ data: card }));
+        return Card.deleteOne(card).then(() => res.send(card));
       }
     })
     .catch(next);
@@ -52,7 +56,7 @@ const handleLikes = (req, res, data, next) => {
     })
     .populate(['owner', 'likes'])
     .then((likes) => {
-      res.send({ data: likes });
+      res.send(likes);
     })
     .catch(next);
 };

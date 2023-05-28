@@ -36,7 +36,7 @@ module.exports.login = (req, res, next) => {
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
-      res.send({ data: users });
+      res.send(users);
     })
     .catch(next);
 };
@@ -47,7 +47,7 @@ const findUserById = (req, res, data, next) => {
       throw new NotFoundError('Нет пользователя с таким id');
     })
     .then((user) => {
-      res.send({ data: user });
+      res.send(user);
     })
     .catch(next);
 };
@@ -100,7 +100,7 @@ const handleUserUpdate = (req, res, data, next) => {
       throw new NotFoundError('Пользователь не найден');
     })
     .then((user) => {
-      res.send({ data: user });
+      res.send(user);
     })
     .catch(next);
 };
@@ -114,12 +114,3 @@ module.exports.updateUserAvatar = (req, res, next) => {
   const data = req.body;
   handleUserUpdate(req, res, data, next);
 };
-// module.exports.signOut = (req, res, next) => {
-//   res
-//     .clearCookie('jwt', {
-//       maxAge: 3600000 * 24 * 7,
-//       httpOnly: true,
-//     })
-//     .send({ message: 'Вы вышли из профиля ' })
-//     .catch(next);
-// };
