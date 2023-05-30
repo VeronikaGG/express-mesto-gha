@@ -58,12 +58,7 @@ module.exports.getUser = (req, res, next) => {
       next(err);
     });
 };
-// обертка
-// module.exports.getUser = (req, res, next) => {
-//   const data = req.params.userId;
-//   findUserById(req, res, data, next);
-// };
-// // обертка
+//
 module.exports.getUserProfile = (req, res, next) => {
   User.findById({ _id: req.user._id })
     .then((user) => {
@@ -117,18 +112,6 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 // обновление профиля пользователя
-// const handleUserUpdate = (req, res, data, next) => {
-//   const userId = req.user._id;
-//   User.findByIdAndUpdate(userId, data, { new: true, runValidators: true })
-//     .orFail(() => {
-//       throw new NotFoundError('Пользователь не найден');
-//     })
-//     .then((user) => {
-//       res.send(user);
-//     })
-//     .catch(next);
-// };
-// обертка
 module.exports.updateUserInfo = (req, res, next) => {
   const owner = req.user._id;
   const { name, about } = req.body;
@@ -155,7 +138,7 @@ module.exports.updateUserInfo = (req, res, next) => {
       next(err);
     });
 };
-// обертка
+// обновление аватара
 module.exports.updateUserAvatar = (req, res, next) => {
   const owner = req.user._id;
   const { avatar } = req.body;
