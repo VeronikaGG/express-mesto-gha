@@ -7,6 +7,8 @@ const allowedCors = [
   'https://api.veronikagg.student.nomoredomains.monster',
   'http://api.veronikagg.student.nomoredomains.monster',
   'http://veronikagg.student.nomoredomains.monster',
+  '//api.veronikagg.student.nomoredomains.monster',
+  '//veronikagg.student.nomoredomains.monster',
 ];
 
 module.exports = (req, res, next) => {
