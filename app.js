@@ -30,9 +30,9 @@ app.get('/crash-test', () => {
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
-app.use(errorLogger);
 app.use(auth);
 app.use('/', indexRouter);
+app.use(errorLogger);
 app.use(errors());
 app.use(handelErrors);
 

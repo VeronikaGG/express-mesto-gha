@@ -34,27 +34,21 @@ const { NODE_ENV, JWT_SECRET } = require('../utils/constants');
 // };
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
+  User.findOne({ email })
+    .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new AuthorizationError('Неправильные email или password'));
+        throw new AuthorizationError('Некорректные email или пароль');
       }
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
-        { expiresIn: '7d' },
-      );
-
-      res.send({ token });
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        Promise.reject(new AuthorizationError('Неправильные email или password'));
-        return;
-      }
-      res.send({ message: 'Всё верно!' });
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          throw new AuthorizationError('Некорректные email или пароль');
+        }
+        const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', {
+          expiresIn: '7d',
+        });
+        res.send({ token });
+      });
     })
     .catch((err) => {
       next(err);
@@ -94,28 +88,32 @@ module.exports.getUserProfile = (req, res, next) => {
 // Добавление пользователя с существующим email в БД
 module.exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name, about, avatar, email,
   } = req.body;
-
   bcrypt
-    .hash(password, 10)
+    .hash(req.body.password, 10)
     .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
+      name, about, avatar, email, password: hash,
     }))
-    .then((user) => {
-      const userData = user.toObject();
-      delete userData.password;
-      res.status(OK_CODE).send(userData);
+    .then((newUser) => {
+      res.status(OK_CODE).send({
+        email: newUser.email,
+        name: newUser.name,
+        about: newUser.about,
+        avatar: newUser.avatar,
+      });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else if (err.code === 11000) {
-        next(new ConflictError('Такой пользователь уже существует'));
+      if (err.code === 11000) {
+        next(
+          new ConflictError('Пользователь с данным email уже существует'),
+        );
+      } else if (err.name === 'ValidationError') {
+        next(
+          new BadRequestError(
+            'Некорректные данные для созданиия пользователя',
+          ),
+        );
       } else {
         next(err);
       }
