@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -39,3 +40,4 @@ app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`The server is running on ${PORT}`);
 });
+// test//
