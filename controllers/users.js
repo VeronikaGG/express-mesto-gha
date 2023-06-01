@@ -5,31 +5,24 @@ const { OK_CODE } = require('../utils/constants');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
-const AuthorizationError = require('../errors/authorizationError');
+// const AuthorizationError = require('../errors/authorizationError');
 const { NODE_ENV, JWT_SECRET } = require('../utils/constants');
 
 // аутентификация
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email })
-    .select('+password')
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new AuthorizationError('Некорректные email или пароль');
-      }
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          throw new AuthorizationError('Некорректные email или пароль');
-        }
-        const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', {
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'JWT_SECRET',
+        {
           expiresIn: '7d',
-        });
-        res.send({ token });
-      });
+        },
+      );
+      res.send({ token });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 // возвращение всех пользователей
 module.exports.getUsers = (req, res, next) => {
