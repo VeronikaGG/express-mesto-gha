@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 const app = express();
 const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
@@ -22,11 +22,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(cors);
 
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
+// app.get('/crash-test', () => {
+//   setTimeout(() => {
+//     throw new Error('Сервер сейчас упадёт');
+//   }, 0);
+// });
 app.use(errors());
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
@@ -40,4 +40,3 @@ app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`The server is running on ${PORT}`);
 });
-// test//
